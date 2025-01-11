@@ -1,9 +1,12 @@
 import json
 import requests
 import datetime
+from typing import List, Dict, Any
 
 
-def get_open_source_projects(existing_projects_in_file: list):
+def get_open_source_projects(
+    existing_projects_in_file: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
     response = requests.get(
         "https://api.github.com/search/repositories?q=stars:>10000&sort=stars"
     )
@@ -24,7 +27,7 @@ def get_open_source_projects(existing_projects_in_file: list):
         return []
 
 
-def get_pull_requests_count(pulls_url):
+def get_pull_requests_count(pulls_url: str) -> int:
     pulls_url = pulls_url.split("{")[0]  # Remove the template part of the URL
     response = requests.get(pulls_url)
     if response.status_code == 200:
@@ -33,8 +36,8 @@ def get_pull_requests_count(pulls_url):
         return 0
 
 
-def main():
-    projects = []
+def main() -> None:
+    projects: List[Dict[str, Any]] = []
     with open("projects.json", "r") as fr:
         projects = json.load(fr)
     projects = get_open_source_projects(projects)
