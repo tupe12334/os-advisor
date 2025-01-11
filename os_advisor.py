@@ -1,14 +1,24 @@
 import json
 import requests
+import datetime
 
 
-def get_open_source_projects():
+def get_open_source_projects(existing_projects_in_file: list):
     response = requests.get(
-        'https://api.github.com/search/repositories?q=stars:>10000&sort=stars')
+        "https://api.github.com/search/repositories?q=stars:>10000&sort=stars"
+    )
     if response.status_code == 200:
         data = response.json()
-        projects = [{"name": item["name"], "url": item["html_url"], "open_issues": item["open_issues_count"], "pull_requests": get_pull_requests_count(item["pulls_url"])}
-                    for item in data["items"]]
+        projects = [
+            {
+                "name": item["name"],
+                "url": item["html_url"],
+                "open_issues": item["open_issues_count"],
+                "pull_requests": get_pull_requests_count(item["pulls_url"]),
+                "request_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            for item in data["items"]
+        ]
         return projects
     else:
         return []
@@ -24,8 +34,11 @@ def get_pull_requests_count(pulls_url):
 
 
 def main():
-    projects = get_open_source_projects()
-    with open('projects.json', 'w') as f:
+    projects = []
+    with open("projects.json", "r") as fr:
+        projects = json.load(fr)
+    projects = get_open_source_projects(projects)
+    with open("projects.json", "w") as f:
         json.dump(projects, f, indent=4)
 
 
